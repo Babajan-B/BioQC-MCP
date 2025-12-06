@@ -89,9 +89,30 @@ Add the server configuration to your Claude Desktop config file:
 
 **Note:** Replace `/path/to/` with your actual installation path.
 
-### Step 3: Restart Claude Desktop
+### Step 3: Test Before Deploying (Recommended)
+
+Before integrating with Claude Desktop or Cursor, test your server:
+
+```bash
+# Run automated verification tests
+./tests/test_mcp_server.sh
+
+# Or launch MCP Inspector for interactive testing
+./tests/launch_inspector.sh
+```
+
+See [docs/TESTING_WITH_INSPECTOR.md](docs/TESTING_WITH_INSPECTOR.md) for detailed testing instructions.
+
+### Step 4: Restart Claude Desktop
 
 Restart Claude Desktop to load the MCP server. The server will be automatically available for use.
+
+## Testing in Other Clients
+
+- **Cursor IDE**: See [QUICKSTART_CURSOR.md](QUICKSTART_CURSOR.md) for 3-step setup
+- **Cursor (Detailed)**: See [CURSOR_SETUP.md](CURSOR_SETUP.md) for comprehensive troubleshooting
+- **MCP Inspector**: See [docs/TESTING_WITH_INSPECTOR.md](docs/TESTING_WITH_INSPECTOR.md) for debugging
+- **Example Config**: See [examples/cursor-mcp-config.json](examples/cursor-mcp-config.json) for Cursor configuration
 
 ## Usage
 
@@ -192,17 +213,39 @@ All components communicate through the Model Context Protocol, enabling seamless
 fastqc-multiqc-mcp-server/
 ├── src/
 │   ├── __init__.py
-│   └── server.py          # Main MCP server implementation
-├── requirements.txt       # Python dependencies
-├── .gitignore            # Git ignore rules
-└── README.md             # This file
+│   └── server.py              # Main MCP server implementation
+├── docs/                       # Additional documentation
+│   ├── TESTING_WITH_INSPECTOR.md
+│   ├── TESTING_COMPLETE.md
+│   ├── DEPLOYMENT_CHECKLIST.md
+│   └── COMPARISON_BIOINFOMCP.md
+├── examples/                   # Example configurations
+│   └── cursor-mcp-config.json
+├── tests/                      # Testing utilities
+│   ├── test_mcp_server.sh
+│   ├── test_server_manually.py
+│   ├── test_real_fastqc.sh
+│   └── launch_inspector.sh
+├── requirements.txt            # Python dependencies
+├── .gitignore                  # Git ignore rules
+├── LICENSE                     # MIT License
+├── README.md                   # Main documentation
+├── QUICKSTART_CURSOR.md        # Cursor quick start
+├── CURSOR_SETUP.md             # Cursor detailed setup
+└── DEPLOYMENT_GUIDE.md         # Deployment instructions
 ```
 
 ## Project Status
 
 **Current Version:** 2.0
 
-**Status:** Production Ready
+**Status:** ✅ **Production Ready & Fully Tested**
+
+**Testing Completed:** December 5, 2025
+- ✅ MCP protocol compliance verified
+- ✅ All 8 tools tested and functional
+- ✅ Inspector integration successful
+- ✅ Ready for Claude Desktop and Cursor IDE
 
 **Recent Updates:**
 - ✅ Integrated chart generation system with 20+ visualization types
@@ -210,6 +253,9 @@ fastqc-multiqc-mcp-server/
 - ✅ Automated quality control pipeline
 - ✅ Multi-sample batch processing support
 - ✅ Publication-quality visualization output
+- ✅ Comprehensive testing suite and documentation
+
+**See Testing Results:** [Testing Summary](.gemini/antigravity/brain/.../testing_summary.md)
 
 ## Contributing
 

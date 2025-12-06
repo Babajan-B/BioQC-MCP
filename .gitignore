@@ -34,8 +34,9 @@ ENV/
 *~
 .DS_Store
 
-# Claude Code
+# Claude/Gemini
 .claude/
+.gemini/
 
 # Testing
 .pytest_cache/
@@ -46,12 +47,22 @@ htmlcov/
 # FastQC/MultiQC outputs
 fastqc_output/
 multiqc_output/
-*.html
-*.zip
+fastqc_results/
+*_fastqc.html
+*_fastqc.zip
+*_fastqc/
 fastqc_data.txt
 summary.txt
+multiqc_data/
+multiqc_report.html
 
 # Temporary files
 *.tmp
 *.bak
 .cache/
+
+# Test data (optional - comment out if you want to include test data)
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz

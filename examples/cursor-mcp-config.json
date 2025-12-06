@@ -1,0 +1,14 @@
+{
+    "mcpServers": {
+        "fastqc-multiqc": {
+            "command": "/Users/jaan/Desktop/Ai-text/fastqc-multiqc-mcp-server/venv/bin/python3",
+            "args": [
+                "/Users/jaan/Desktop/Ai-text/fastqc-multiqc-mcp-server/src/server.py"
+            ],
+            "env": {
+                "PATH": "/usr/local/bin:/opt/homebrew/bin:${PATH}",
+                "PYTHONUNBUFFERED": "1"
+            }
+        }
+    }
+}
