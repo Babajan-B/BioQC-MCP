@@ -1,200 +1,321 @@
 # FastQC & MultiQC MCP Server
 
-A professional Model Context Protocol (MCP) server for comprehensive bioinformatics quality control analysis. This server provides an integrated three-pronged approach to genomic data quality assessment: automated QC pipeline execution, interactive HTML report analysis, and dynamic data visualization.
+A professional Model Context Protocol (MCP) server for comprehensive bioinformatics quality control analysis. This server provides automated QC pipeline execution, HTML report analysis, and advanced data visualization for sequencing data.
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-1.0+-green.svg)](https://github.com/modelcontextprotocol)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)]()
 
-## Overview
+## 🚀 Quick Start
 
-This MCP server combines three essential approaches to quality control analysis:
-
-1. **Automated Quality Control Pipeline** - Execute FastQC and MultiQC analyses programmatically on sequencing data
-2. **Intelligent HTML Report Analysis** - Read, parse, and interpret quality control reports directly within your workflow
-3. **Dynamic Data Visualization** - Generate publication-quality charts and graphs from quality metrics
-
-## Key Features
-
-### Quality Control Pipeline
-- Run FastQC analysis on individual or batch FASTQ files
-- Generate MultiQC aggregate reports from multiple samples
-- Auto-detect and validate FASTQ files in directories
-- Parse and extract quality metrics from analysis results
-- Support for all standard sequencing file formats (.fastq, .fq, .fastq.gz, .fq.gz)
-
-### HTML Report Analysis
-- Direct preview of FastQC and MultiQC HTML reports
-- Extract structured information from quality control reports
-- Analyze report structure, headings, tables, and data sections
-- Interpret quality metrics without external browser dependencies
-- Text-based content extraction and analysis
-
-### Data Visualization
-- Generate 20+ chart types for quality metrics visualization
-- Automatic extraction and plotting of QC data from reports
-- Publication-quality output with customizable styles and themes
-- Support for multiple chart formats: line, bar, scatter, heatmap, violin, box, density, and more
-- Interactive data visualization from parsed report data
-
-## Prerequisites
-
-**Required Software:**
-- Python 3.8 or higher
-- FastQC (bioinformatics quality control tool)
-- MultiQC (aggregate reporting tool)
-
-**Installation Commands:**
 ```bash
-# Install FastQC (macOS)
-brew install fastqc
+# 1. Clone and setup
+git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+cd fastqc-multiqc-mcp-server
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 
-# Install MultiQC
+# 2. Install prerequisites
+brew install fastqc          # macOS
 pip install multiqc
+
+# 3. Test the server
+./tests/test_mcp_server.sh
+
+# 4. Configure in Claude/Cursor (see below)
 ```
 
-## Installation
+---
 
-### Step 1: Clone and Setup Environment
+## 📋 Overview
+
+This MCP server provides 8 specialized tools for bioinformatics quality control:
+
+1. **run_fastqc** - Execute FastQC analysis on FASTQ files
+2. **run_multiqc** - Generate MultiQC aggregate reports
+3. **list_fastq_files** - Auto-detect FASTQ files in directories
+4. **parse_fastqc_summary** - Extract quality metrics
+5. **extract_fastqc_plots** - Retrieve plot data
+6. **read_html_file** - Read FastQC/MultiQC HTML reports
+7. **analyze_html_content** - Parse HTML structure and data
+8. **generate_chart** - Create custom visualizations (20+ chart types)
+
+**Key Capabilities:**
+- Automated quality control workflows
+- HTML report interpretation
+- Advanced visualization (line, bar, scatter, heat map, violin, box plots, etc.)
+- Publication-quality chart generation
+- Multi-sample analysis and aggregation
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+**Required:**
+- Python 3.8+
+- FastQC
+- MultiQC
+
+**Install Commands:**
+```bash
+# macOS
+brew install fastqc
+pip install multiqc
+
+# Linux (Ubuntu/Debian)
+sudo apt-get install fastqc
+pip install multiqc
+
+# Verify installation
+fastqc --version
+multiqc --version
+```
+
+### Setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
 cd fastqc-multiqc-mcp-server
 
-# Create virtual environment (recommended)
+# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Verify setup
+./tests/test_mcp_server.sh
 ```
 
-### Step 2: Configure Claude Desktop
+---
 
-Add the server configuration to your Claude Desktop config file:
+## ⚙️ Configuration
 
-**Location:** `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+### Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "fastqc-multiqc": {
-      "command": "/path/to/venv/bin/python3",
-      "args": ["/path/to/fastqc-multiqc-mcp-server/src/server.py"]
+      "command": "/FULL/PATH/TO/venv/bin/python3",
+      "args": ["/FULL/PATH/TO/fastqc-multiqc-mcp-server/src/server.py"]
     }
   }
 }
 ```
 
-**Note:** Replace `/path/to/` with your actual installation path.
+**Replace `/FULL/PATH/TO/` with your actual installation path.**
 
-### Step 3: Test Before Deploying (Recommended)
+Restart Claude Desktop after saving.
 
-Before integrating with Claude Desktop or Cursor, test your server:
+### Cursor IDE
 
+**Option 1: Quick Setup**
 ```bash
-# Run automated verification tests
-./tests/test_mcp_server.sh
+# Copy example config
+mkdir -p ~/Library/Application\ Support/Cursor/User/globalStorage
+cp examples/cursor-mcp-config.json ~/Library/Application\ Support/Cursor/User/globalStorage/mcp.json
 
-# Or launch MCP Inspector for interactive testing
+# Edit the file and update paths to your installation
+# Then restart Cursor (⌘Q and reopen)
+```
+
+**Option 2: Manual Setup**
+
+Edit or create `~/Library/Application Support/Cursor/User/globalStorage/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "fastqc-multiqc": {
+      "command": "/FULL/PATH/TO/venv/bin/python3",
+      "args": ["/FULL/PATH/TO/fastqc-multiqc-mcp-server/src/server.py"],
+      "env": {
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:${PATH}",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}
+```
+
+**Restart Cursor** (⌘Q and reopen) after saving.
+
+**Verify:** Open Cursor AI chat and ask: *"What MCP tools are available?"*
+
+---
+
+## 🧪 Testing
+
+### Automated Verification
+```bash
+# Run all checks
+./tests/test_mcp_server.sh
+```
+
+This verifies:
+- Python environment
+- Dependencies installed
+- FastQC/MultiQC available
+- Server syntax valid
+
+### Manual MCP Protocol Test
+```bash
+# Test MCP protocol compliance
+python3 tests/test_server_manually.py
+```
+
+### Interactive Testing with MCP Inspector
+```bash
+# Launch Inspector for interactive testing
 ./tests/launch_inspector.sh
 ```
 
-See [docs/TESTING_WITH_INSPECTOR.md](docs/TESTING_WITH_INSPECTOR.md) for detailed testing instructions.
+Navigate to http://localhost:6274 and configure:
+- Command: `/FULL/PATH/TO/venv/bin/python3`
+- Arguments: `/FULL/PATH/TO/src/server.py`
+- Click "Connect" to test tools interactively
 
-### Step 4: Restart Claude Desktop
+---
 
-Restart Claude Desktop to load the MCP server. The server will be automatically available for use.
-
-## Testing in Other Clients
-
-- **Cursor IDE**: See [QUICKSTART_CURSOR.md](QUICKSTART_CURSOR.md) for 3-step setup
-- **Cursor (Detailed)**: See [CURSOR_SETUP.md](CURSOR_SETUP.md) for comprehensive troubleshooting
-- **MCP Inspector**: See [docs/TESTING_WITH_INSPECTOR.md](docs/TESTING_WITH_INSPECTOR.md) for debugging
-- **Example Config**: See [examples/cursor-mcp-config.json](examples/cursor-mcp-config.json) for Cursor configuration
-
-## Usage
-
-Interact with the server through natural language queries to Claude:
+## 💡 Usage Examples
 
 ### Quality Control Analysis
 ```
 "Run FastQC analysis on sample1.fastq and sample2.fastq"
-"Check the quality of all FASTQ files in ~/sequencing_data/"
-"Create a MultiQC report for all samples in the fastqc_output directory"
-"What's the overall quality score of my sequencing data?"
+"Check the quality of all FASTQ files in ~/data/sequencing/"
+"Create a MultiQC report for samples in ~/results/"
 ```
 
 ### Report Analysis
 ```
-"Read the FastQC HTML report at ~/results/sample_fastqc.html"
-"What does the MultiQC report say about my samples?"
-"Analyze the structure of the quality control report"
-"Extract the key quality metrics from the FastQC report"
+"Read the FastQC report at ~/results/sample_fastqc.html"
+"What does the quality report say about adapter contamination?"
+"Summarize the MultiQC report findings"
 ```
 
 ### Data Visualization
 ```
-"Show me the per base quality scores as a line chart"
-"Generate a heatmap of the quality metrics"
+"Generate a line chart showing per-base quality scores"
 "Create a bar chart comparing GC content across samples"
-"Visualize the adapter contamination data"
+"Make a heatmap of quality metrics"
 ```
 
-## Workflow Example
+### Complete Workflow
+```
+"Analyze all FASTQ files in ~/data/, generate FastQC reports, 
+create a MultiQC summary, and show me a chart of overall quality scores"
+```
 
-A typical quality control workflow using this server:
+---
 
-1. **Discovery:** Identify FASTQ files in your data directory
-2. **Analysis:** Run FastQC on all samples
-3. **Aggregation:** Generate MultiQC report for comparison
-4. **Interpretation:** Read and analyze HTML reports
-5. **Visualization:** Create custom charts for presentations
-6. **Decision:** Make informed decisions based on comprehensive quality metrics
+## 🛠️ Troubleshooting
 
-All steps can be performed through natural language interactions with Claude.
+### Tools Not Showing in Claude/Cursor
 
-## Capabilities
+1. **Verify paths in config file**
+   ```bash
+   # Check Python path
+   which python3  # After activating venv
+   
+   # Check server path
+   ls -la src/server.py
+   ```
 
-### Supported Analysis Types
-- Per base sequence quality assessment
-- Per sequence quality score distribution
-- GC content analysis
-- Sequence length distribution
-- Adapter contamination detection
-- Duplicate sequence identification
-- Overrepresented sequences
-- Per base N content
+2. **Re-run verification**
+   ```bash
+   ./tests/test_mcp_server.sh
+   ```
 
-### Available Visualization Types
-- **Statistical Charts:** box plots, violin plots, histograms, density plots
-- **Comparison Charts:** bar charts, scatter plots, line graphs
-- **Distribution Charts:** heatmaps, area plots, KDE plots
-- **Advanced Visualizations:** regression plots, joint plots, pair plots
+3. **Check logs**
+   - **Claude**: Check Developer console
+   - **Cursor**: View > Developer > Toggle Developer Tools > Console
 
-### Report Processing
-- Full HTML content extraction
-- Structured data parsing
-- Metadata extraction
-- Summary statistics calculation
-- Quality metric interpretation
+### FastQC/MultiQC Not Found
 
-## Architecture
+```bash
+# Verify installation
+which fastqc
+which multiqc
 
-The server implements a modular architecture with three core components:
+# If not found, install
+brew install fastqc  # macOS
+pip install multiqc
 
-1. **Pipeline Module:** Interfaces with FastQC/MultiQC command-line tools
-2. **Parser Module:** Extracts and structures data from reports
-3. **Visualization Module:** Generates charts using matplotlib, seaborn, and plotly
+# Check PATH in config
+# Add to config JSON:
+"env": {
+  "PATH": "/usr/local/bin:/opt/homebrew/bin:${PATH}"
+}
+```
 
-All components communicate through the Model Context Protocol, enabling seamless integration with Claude.
+### Server Won't Start
 
-## Technical Specifications
+```bash
+# Check dependencies
+pip install -r requirements.txt
 
-**Programming Language:** Python 3.8+
+# Test server directly
+source venv/bin/activate
+python3 src/server.py
+# Should show MCP protocol output
 
-**Core Dependencies:**
+# Check syntax
+python3 -m py_compile src/server.py
+```
+
+### Permission Issues
+
+```bash
+# Make scripts executable
+chmod +x tests/*.sh
+chmod +x src/server.py
+```
+
+---
+
+## 📂 Project Structure
+
+```
+fastqc-multiqc-mcp-server/
+├── src/
+│   ├── __init__.py
+│   └── server.py              # Main MCP server
+├── tests/                      # Testing utilities
+│   ├── test_mcp_server.sh     # Automated verification
+│   ├── test_server_manually.py# MCP protocol test
+│   ├── test_real_fastqc.sh    # Real data test
+│   └── launch_inspector.sh    # MCP Inspector launcher
+├── examples/                   # Configuration examples
+│   └── cursor-mcp-config.json
+├── docs/                       # Additional documentation
+│   ├── TESTING_WITH_INSPECTOR.md
+│   ├── TESTING_COMPLETE.md
+│   ├── DEPLOYMENT_CHECKLIST.md
+│   └── COMPARISON_BIOINFOMCP.md
+├── requirements.txt            # Python dependencies
+├── CHANGELOG.md                # Version history
+├── LICENSE                     # MIT License
+└── README.md                   # This file
+```
+
+---
+
+## 🔧 Technical Specifications
+
+**MCP Protocol:** 2024-11-05  
+**Python Version:** 3.8+  
+**Server Version:** 2.0.0  
+
+**Dependencies:**
 - mcp >= 1.0.0 (Model Context Protocol)
 - pydantic >= 2.0.0 (data validation)
 - matplotlib >= 3.8.0 (visualization)
@@ -207,74 +328,106 @@ All components communicate through the Model Context Protocol, enabling seamless
 - FastQC (quality control)
 - MultiQC (report aggregation)
 
-## Project Structure
-
-```
-fastqc-multiqc-mcp-server/
-├── src/
-│   ├── __init__.py
-│   └── server.py              # Main MCP server implementation
-├── docs/                       # Additional documentation
-│   ├── TESTING_WITH_INSPECTOR.md
-│   ├── TESTING_COMPLETE.md
-│   ├── DEPLOYMENT_CHECKLIST.md
-│   └── COMPARISON_BIOINFOMCP.md
-├── examples/                   # Example configurations
-│   └── cursor-mcp-config.json
-├── tests/                      # Testing utilities
-│   ├── test_mcp_server.sh
-│   ├── test_server_manually.py
-│   ├── test_real_fastqc.sh
-│   └── launch_inspector.sh
-├── requirements.txt            # Python dependencies
-├── .gitignore                  # Git ignore rules
-├── LICENSE                     # MIT License
-├── README.md                   # Main documentation
-├── QUICKSTART_CURSOR.md        # Cursor quick start
-├── CURSOR_SETUP.md             # Cursor detailed setup
-└── DEPLOYMENT_GUIDE.md         # Deployment instructions
-```
-
-## Project Status
-
-**Current Version:** 2.0
-
-**Status:** ✅ **Production Ready & Fully Tested**
-
-**Testing Completed:** December 5, 2025
-- ✅ MCP protocol compliance verified
-- ✅ All 8 tools tested and functional
-- ✅ Inspector integration successful
-- ✅ Ready for Claude Desktop and Cursor IDE
-
-**Recent Updates:**
-- ✅ Integrated chart generation system with 20+ visualization types
-- ✅ HTML report preview and analysis capabilities
-- ✅ Automated quality control pipeline
-- ✅ Multi-sample batch processing support
-- ✅ Publication-quality visualization output
-- ✅ Comprehensive testing suite and documentation
-
-**See Testing Results:** [Testing Summary](.gemini/antigravity/brain/.../testing_summary.md)
-
-## Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with clear commit messages
-4. Add tests for new functionality
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, reach out to: **bioinformatics.bb@gmail.com**
+**Supported File Formats:**
+- .fastq, .fq (uncompressed)
+- .fastq.gz, .fq.gz (gzip compressed)
 
 ---
 
-**Note:** This server is designed for local execution and does not require external API dependencies or network connectivity for core functionality.
+## 🎯 Features
+
+### Quality Control Pipeline
+- ✅ Single and batch FASTQ analysis
+- ✅ Multi-sample aggregation
+- ✅ Automatic file discovery
+- ✅ Threaded execution support
+- ✅ All standard sequencing formats
+
+### Report Analysis
+- ✅ HTML report parsing
+- ✅ Structured data extraction
+- ✅ Quality metrics interpretation
+- ✅ Table and chart data extraction
+- ✅ No browser required
+
+### Visualization
+- ✅ 20+ chart types
+- ✅ Publication-quality output
+- ✅ Custom styling and themes
+- ✅ Multiple export formats
+- ✅ Interactive charts (Plotly)
+
+---
+
+## 📊 Tested & Verified
+
+- ✅ MCP Protocol 2024-11-05 compliant
+- ✅ Tested with real 2.5GB FASTQ files
+- ✅ Claude Desktop integration (December 2025)
+- ✅ Cursor IDE ready
+- ✅ MCP Inspector validated
+- ✅ All 8 tools functional
+- ✅ Production ready
+
+---
+
+## 🚀 Deployment
+
+### Share via GitHub
+
+1. Create repository on GitHub
+2. Push code:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+   git branch -M main
+   git push -u origin main
+   ```
+3. Add topics: `mcp-server`, `bioinformatics`, `fastqc`, `quality-control`
+
+### Users Install:
+```bash
+git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+cd fastqc-multiqc-mcp-server
+./tests/test_mcp_server.sh  # Verify setup
+# Then configure in Claude/Cursor
+```
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+---
+
+## 📧 Support
+
+- **Issues**: GitHub Issues
+- **Email**: bioinformatics.bb@gmail.com
+- **Documentation**: See `docs/` directory for additional guides
+
+---
+
+## 🎓 Resources
+
+- [Model Context Protocol](https://github.com/modelcontextprotocol)
+- [FastQC Documentation](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [MultiQC Documentation](https://multiqc.info/)
+- [MCP Server Examples](https://github.com/modelcontextprotocol/servers)
+
+---
+
+**Version:** 2.0.0  
+**Status:** Production Ready  
+**Last Updated:** December 2025
