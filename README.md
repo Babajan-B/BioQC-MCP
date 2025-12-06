@@ -49,6 +49,11 @@ This MCP server provides 8 specialized tools for bioinformatics quality control:
 - Publication-quality chart generation
 - Multi-sample analysis and aggregation
 
+### 🔄 Workflow
+
+![BioQC-MCP Workflow](assets/workflow.jpeg)
+
+
 ---
 
 ## 📦 Installation
