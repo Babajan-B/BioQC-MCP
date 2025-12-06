@@ -7,6 +7,8 @@ A professional Model Context Protocol (MCP) server for comprehensive bioinformat
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)]()
 
+![BioQC-MCP Workflow](assets/workflow.jpeg)
+
 ## 🚀 Quick Start
 
 ```bash
@@ -48,11 +50,6 @@ This MCP server provides 8 specialized tools for bioinformatics quality control:
 - Advanced visualization (line, bar, scatter, heat map, violin, box plots, etc.)
 - Publication-quality chart generation
 - Multi-sample analysis and aggregation
-
-### 🔄 Workflow
-
-![BioQC-MCP Workflow](assets/workflow.jpeg)
-
 
 ---
 
