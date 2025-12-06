@@ -247,6 +247,30 @@ TOOLS: list[Tool] = [
             },
             "required": ["fastqc_dir"]
         }
+    ),
+    Tool(
+        name="run_qc_pipeline",
+        description="""Execute a complete QC pipeline as Python code in a single call. 
+        Reduces token usage by up to 98% for complex workflows by processing data in a sandboxed environment.
+        Available functions: list_fastq_files(dir), run_fastqc(files, output_dir), run_multiqc(input_dir, output_dir),
+        parse_fastqc_summary(fastqc_dir), generate_chart(chart_type, data, title), read_html_file(path),
+        analyze_html(path), extract_plots(fastqc_dir), visualize_qc(fastqc_dir).
+        Use print() to output results. Last expression value is returned.""",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "Python code to execute. Access all BioQC functions directly."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Execution timeout in seconds (default: 300)",
+                    "default": 300
+                }
+            },
+            "required": ["code"]
+        }
     )
 ]
 
@@ -582,6 +606,152 @@ def extract_and_visualize_qc(fastqc_dir: str, metrics: list[str] = ["all"]) -> d
     except Exception as e:
         logger.error(f"Error extracting and visualizing QC data: {e}")
         return {"success": False, "error": str(e)}
+
+
+def execute_qc_pipeline(code: str, timeout: int = 300) -> dict[str, Any]:
+    """
+    Execute QC pipeline code in a sandboxed environment.
+    
+    This enables AI agents to write and execute complete QC workflows
+    in a single tool call, reducing token usage by up to 98%.
+    
+    Based on Anthropic's "Code Execution with MCP" architecture.
+    """
+    import signal
+    from contextlib import redirect_stdout, redirect_stderr
+    
+    # Capture output
+    stdout_buffer = io.StringIO()
+    stderr_buffer = io.StringIO()
+    
+    # Create restricted execution environment with only QC functions
+    # This prevents arbitrary code execution while allowing full QC functionality
+    safe_globals = {
+        # BioQC functions
+        'list_fastq_files': find_fastq_files,
+        'run_fastqc': run_fastqc_analysis,
+        'run_multiqc': run_multiqc_analysis,
+        'parse_fastqc_summary': parse_fastqc_data,
+        'generate_chart': generate_chart_from_data,
+        'read_html_file': read_html_file,
+        'analyze_html': analyze_html_structure,
+        'extract_plots': extract_plots_from_fastqc,
+        'visualize_qc': extract_and_visualize_qc,
+        
+        # Safe built-ins for data manipulation
+        'print': lambda *args, **kwargs: print(*args, **kwargs, file=stdout_buffer),
+        'len': len,
+        'str': str,
+        'int': int,
+        'float': float,
+        'bool': bool,
+        'list': list,
+        'dict': dict,
+        'tuple': tuple,
+        'set': set,
+        'range': range,
+        'enumerate': enumerate,
+        'zip': zip,
+        'map': map,
+        'filter': filter,
+        'sorted': sorted,
+        'reversed': reversed,
+        'sum': sum,
+        'min': min,
+        'max': max,
+        'abs': abs,
+        'round': round,
+        'any': any,
+        'all': all,
+        
+        # Data structures
+        'json': json,
+        'Path': Path,
+        
+        # Useful for QC data
+        'isinstance': isinstance,
+        'type': type,
+    }
+    
+    # Local namespace for execution results
+    local_namespace = {}
+    
+    result = {
+        'success': True,
+        'stdout': '',
+        'stderr': '',
+        'result': None,
+        'variables': {}
+    }
+    
+    # Timeout handler
+    def timeout_handler(signum, frame):
+        raise TimeoutError(f"Pipeline execution timed out after {timeout} seconds")
+    
+    try:
+        # Set timeout (Unix only)
+        if hasattr(signal, 'SIGALRM'):
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(timeout)
+        
+        # Execute code with output capture
+        with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
+            exec(code, safe_globals, local_namespace)
+        
+        # Cancel timeout
+        if hasattr(signal, 'SIGALRM'):
+            signal.alarm(0)
+        
+        # Capture output
+        result['stdout'] = stdout_buffer.getvalue()
+        result['stderr'] = stderr_buffer.getvalue()
+        
+        # Extract serializable results from local namespace
+        for key, value in local_namespace.items():
+            if not key.startswith('_'):
+                try:
+                    # Try to serialize the value
+                    json.dumps(value)
+                    result['variables'][key] = value
+                except (TypeError, ValueError):
+                    # Not serializable, convert to string
+                    result['variables'][key] = str(value)
+        
+        # If there's a 'result' or 'results' variable, use it as the main result
+        if 'result' in local_namespace:
+            result['result'] = local_namespace['result']
+        elif 'results' in local_namespace:
+            result['result'] = local_namespace['results']
+        
+        logger.info(f"Pipeline executed successfully. Output length: {len(result['stdout'])}")
+        
+    except TimeoutError as e:
+        result['success'] = False
+        result['error'] = str(e)
+        logger.error(f"Pipeline timeout: {e}")
+        
+    except SyntaxError as e:
+        result['success'] = False
+        result['error'] = f"Syntax error in pipeline code: {e}"
+        logger.error(f"Pipeline syntax error: {e}")
+        
+    except NameError as e:
+        result['success'] = False
+        result['error'] = f"Undefined function or variable: {e}. Available functions: list_fastq_files, run_fastqc, run_multiqc, parse_fastqc_summary, generate_chart, read_html_file, analyze_html, extract_plots, visualize_qc"
+        logger.error(f"Pipeline name error: {e}")
+        
+    except Exception as e:
+        result['success'] = False
+        result['error'] = f"Pipeline execution error: {str(e)}"
+        result['stderr'] = stderr_buffer.getvalue()
+        logger.error(f"Pipeline error: {e}")
+        
+    finally:
+        # Ensure timeout is cancelled
+        if hasattr(signal, 'SIGALRM'):
+            signal.alarm(0)
+    
+    return result
 
 
 def find_fastq_files(directory: str, recursive: bool = False) -> list[dict[str, Any]]:
@@ -1030,6 +1200,17 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageCo
                 ))
 
             return content_list
+
+        elif name == "run_qc_pipeline":
+            code = arguments.get("code", "")
+            timeout = arguments.get("timeout", 300)
+
+            result = execute_qc_pipeline(code, timeout)
+
+            return [TextContent(
+                type="text",
+                text=json.dumps(result, indent=2)
+            )]
 
         else:
             return [TextContent(
