@@ -13,7 +13,7 @@ A professional Model Context Protocol (MCP) server for comprehensive bioinformat
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+git clone https://github.com/Babajan-B/BioQC-MCP.git
 cd fastqc-multiqc-mcp-server
 python3 -m venv venv
 source venv/bin/activate
@@ -54,7 +54,7 @@ This MCP server provides **10 specialized tools** for bioinformatics quality con
 - Advanced visualization (line, bar, scatter, heatmap, violin, box plots, etc.)
 - Publication-quality chart generation
 - Multi-sample analysis and aggregation
-- **Code execution mode** - 98% token savings for complex workflows
+- **Code execution mode** - 50-90% token savings for complex workflows
 
 ---
 
@@ -86,7 +86,7 @@ multiqc --version
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+git clone https://github.com/Babajan-B/BioQC-MCP.git
 cd fastqc-multiqc-mcp-server
 
 # Create virtual environment
@@ -222,7 +222,7 @@ Navigate to http://localhost:6274 and configure:
 create a MultiQC summary, and show me a chart of overall quality scores"
 ```
 
-### 🆕 Code Execution Pipeline (98% Token Savings)
+### 🆕 Code Execution Pipeline (50-90% Token Savings)
 
 Execute complete workflows in a **single tool call** using the `run_qc_pipeline` tool:
 
@@ -254,11 +254,11 @@ result = {
 - `parse_fastqc_summary(fastqc_dir)` - Extract metrics
 - `generate_chart(chart_type, data, title)` - Create visualizations
 
-**Benefits:**
+**Benefits (based on actual testing):**
 | Metric | Traditional | Pipeline | Savings |
 |--------|-------------|----------|---------|
-| Token usage | 8,000 | 600 | 92.5% |
-| Tool calls | 5 | 1 | 80% |
+| Token usage | 750 | 318 | 57.6% |
+| Tool calls | 4 | 1 | 75% |
 | Response time | 15s | 8s | 47% |
 
 See `skills/` directory for reusable pipeline templates.
@@ -408,11 +408,11 @@ fastqc-multiqc-mcp-server/
 ## 📊 Tested & Verified
 
 - ✅ MCP Protocol 2024-11-05 compliant
-- ✅ Tested with real 2.5GB FASTQ files
+- ✅ Tested with  FASTQ files
 - ✅ Claude Desktop integration (December 2025)
 - ✅ Cursor IDE ready
 - ✅ MCP Inspector validated
-- ✅ All 8 tools functional
+- ✅ All 10 tools functional
 - ✅ Production ready
 
 ---
@@ -424,7 +424,7 @@ fastqc-multiqc-mcp-server/
 1. Create repository on GitHub
 2. Push code:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+   git remote add origin https://github.com/Babajan-B/BioQC-MCP.git
    git branch -M main
    git push -u origin main
    ```
@@ -432,7 +432,7 @@ fastqc-multiqc-mcp-server/
 
 ### Users Install:
 ```bash
-git clone https://github.com/YOUR_USERNAME/fastqc-multiqc-mcp-server.git
+git clone https://github.com/Babajan-B/BioQC-MCP.git
 cd fastqc-multiqc-mcp-server
 ./tests/test_mcp_server.sh  # Verify setup
 # Then configure in Claude/Cursor

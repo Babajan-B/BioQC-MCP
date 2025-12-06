@@ -48,9 +48,11 @@ TOOLS: list[Tool] = [
             "type": "object",
             "properties": {
                 "input_files": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of FASTQ file paths to analyze"
+                    "oneOf": [
+                        {"type": "string"},
+                        {"type": "array", "items": {"type": "string"}}
+                    ],
+                    "description": "FASTQ file path(s) to analyze - can be a single path or array of paths"
                 },
                 "output_dir": {
                     "type": "string",
@@ -778,8 +780,12 @@ def find_fastq_files(directory: str, recursive: bool = False) -> list[dict[str, 
     return sorted(fastq_files, key=lambda x: x["name"])
 
 
-def run_fastqc_analysis(input_files: list[str], output_dir: str = "fastqc_output", threads: int = 2) -> dict[str, Any]:
+def run_fastqc_analysis(input_files, output_dir: str = "fastqc_output", threads: int = 2) -> dict[str, Any]:
     """Run FastQC on input files"""
+    # Handle both string and list inputs
+    if isinstance(input_files, str):
+        input_files = [input_files]
+    
     output_path = Path(output_dir).expanduser()
     output_path.mkdir(parents=True, exist_ok=True)
 
